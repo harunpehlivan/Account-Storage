@@ -51,34 +51,23 @@ class entity_add:
         self.window = master
 
     def write(self):
-        f = open('emails.txt', "a")
-        n = self.name
-        e = self.email
-        p = self.password
+        with open('emails.txt', "a") as f:
+            n = self.name
+            encryptedN = "".join(
+                ' ' if letter == ' ' else chr(ord(letter) + 5) for letter in n
+            )
 
-        encryptedN = ""
-        encryptedE = ""
-        encryptedP = ""
-        for letter in n:
-            if letter == ' ':
-                encryptedN += ' '
-            else:
-                encryptedN += chr(ord(letter) + 5)
+            e = self.email
+            encryptedE = "".join(
+                ' ' if letter == ' ' else chr(ord(letter) + 5) for letter in e
+            )
 
-        for letter in e:
-            if letter == ' ':
-                encryptedE += ' '
-            else:
-                encryptedE += chr(ord(letter) + 5)
+            p = self.password
+            encryptedP = "".join(
+                ' ' if letter == ' ' else chr(ord(letter) + 5) for letter in p
+            )
 
-        for letter in p:
-            if letter == ' ':
-                encryptedP += ' '
-            else:
-                encryptedP += chr(ord(letter) + 5)
-
-        f.write(encryptedN + ',' + encryptedE + ',' + encryptedP + ', \n')
-        f.close()
+            f.write(f'{encryptedN},{encryptedE},{encryptedP}' + ', \n')
 
 
 class entity_display:
@@ -89,27 +78,18 @@ class entity_display:
         self.email = e
         self.window = master
         self.i = i
+        dencryptedN = "".join(
+            ' ' if letter == ' ' else chr(ord(letter) - 5) for letter in self.name
+        )
 
-        dencryptedN = ""
-        dencryptedE = ""
-        dencryptedP = ""
-        for letter in self.name:
-            if letter == ' ':
-                dencryptedN += ' '
-            else:
-                dencryptedN += chr(ord(letter) - 5)
+        dencryptedE = "".join(
+            ' ' if letter == ' ' else chr(ord(letter) - 5) for letter in self.email
+        )
 
-        for letter in self.email:
-            if letter == ' ':
-                dencryptedE += ' '
-            else:
-                dencryptedE += chr(ord(letter) - 5)
-
-        for letter in self.password:
-            if letter == ' ':
-                dencryptedP += ' '
-            else:
-                dencryptedP += chr(ord(letter) - 5)
+        dencryptedP = "".join(
+            ' ' if letter == ' ' else chr(ord(letter) - 5)
+            for letter in self.password
+        )
 
         self.label_name = Label(self.window, text=dencryptedN, font=('Courier', 14))
         self.label_email = Label(self.window, text=dencryptedE, font=('Courier', 14))
@@ -129,19 +109,16 @@ class entity_display:
             for i in objects:
                 i.destroy()
 
-            f = open('emails.txt', 'r')
-            lines = f.readlines()
-            f.close()
+            with open('emails.txt', 'r') as f:
+                lines = f.readlines()
+            with open('emails.txt', "w") as f:
+                count = 0
 
-            f = open('emails.txt', "w")
-            count = 0
+                for line in lines:
+                    if count != self.i:
+                        f.write(line)
+                        count += 1
 
-            for line in lines:
-                if count != self.i:
-                    f.write(line)
-                    count += 1
-
-            f.close()
             readfile()
 
     def destroy(self):
@@ -173,16 +150,12 @@ def clearfile():
 
 
 def readfile():
-    f = open('emails.txt', 'r')
-    count = 0
-
-    for line in f:
-        entityList = line.split(',')
-        e = entity_display(window, entityList[0], entityList[1], entityList[2], count)
-        objects.append(e)
-        e.display()
-        count += 1
-    f.close()
+    with open('emails.txt', 'r') as f:
+        for count, line in enumerate(f):
+            entityList = line.split(',')
+            e = entity_display(window, entityList[0], entityList[1], entityList[2], count)
+            objects.append(e)
+            e.display()
 
 
 # ******* GRAPHICS *********
